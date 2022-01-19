@@ -1,0 +1,38 @@
+version: '3'
+services:
+    mqtt:
+        image: eclipse-mosquitto:latest
+        restart: "always"
+        deploy:
+            resources:
+                limits:
+                    memory: 125M
+        hostname: mqtt
+        ports: 
+            - "1883:1883"
+        volumes:
+            - ./mqtt/config/mosquitto.conf:/mosquitto/config/mosquitto.conf
+            - ./mqtt/data:/mosquitto/data
+            - ./mqtt/log:/mosquitto/log
+    hm2homie:
+        image: ghcr.io/homie-homecontrol/hc-hm2homie:latest
+        restart: "always"
+        depends_on:
+            - mqtt
+        ports: 
+            - "9125:9125"
+        deploy:
+            resources:
+                limits:
+                    memory: 1000M
+        # network_mode: host
+        environment: 
+            HCHM2H_CTRL_ID: hc-hm2homie-ctrl1
+            HCHM2H_CTRL_NAME: Homematic to homie interface controller
+            HCHM2H_CCU_HOST: <CCU host or IP>
+            HCHM2H_CCU_INTERFACES: <bidcos-rf, hmip-rf>
+            HCHM2H_CCU_CALLBACK_HOST: <Hostname or IP of system where container is runnning>
+            HCHM2H_CCU_CALLBACK_PORT: "9125"
+            HCHM2H_CCU_CALLBACK_ID: "HCHM2H"
+            HCHM2H_MQTT_URL: "mqtt://mqtt"
+            HCHM2H_MQTT_TOPIC_ROOT: homie
