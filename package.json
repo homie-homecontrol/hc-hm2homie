@@ -16,7 +16,7 @@
     "homematic-rega": "~1.5.2",
     "homematic-xmlrpc": "~1.0.2",
     "node-homie": "~0.9.24",
-    "hc-node-homie-smarthome": "~0.4.2",
+    "hc-node-homie-smarthome": "~0.5.0",
     "rxjs": "~7.4.0",
     "winston": "~3.3.3"
   },

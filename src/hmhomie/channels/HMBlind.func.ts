@@ -33,7 +33,7 @@ function createBlindNode(device: FactoryDevice, channel: Channel, conn: CCUConne
             next: event => {
                 const val = homiePositionToBlindsPosition(event.value);
 
-               conn.ccu.putParamset(conn.clientId, channel.definition.ADDRESS, 'VALUES', { [blindChannel_Param_Level]: val }).then(() => {
+                conn.ccu.putParamset(conn.clientId, channel.definition.ADDRESS, 'VALUES', { [blindChannel_Param_Level]: val }).then(() => {
                     event.property.value = event.valueStr;
                 }).catch((err) => {
                     log.error(`${node.propPosition.pointer}: error setting value to ${val} -- ${typeof val}`, err)
@@ -46,50 +46,51 @@ function createBlindNode(device: FactoryDevice, channel: Channel, conn: CCUConne
     );
 
 
-    node.propUp.onSetMessage$.pipe(takeUntil(node.onDestroy$)).subscribe(
-        {
-            next: event => {
-               
-                conn.ccu.putParamset(conn.clientId, channel.definition.ADDRESS, 'VALUES', { [blindChannel_Param_Level]: "100" }).then(() => {
-                    event.property.value = event.valueStr;
-                }).catch((err) => {
-                    log.error(`${node.propUp.pointer}: error setting level value to "100"`, err)
-                })
-            },
-            error: (err) => {
-                log.error(`Error process set Event for [${node.propUp.pointer}]/[${channel.definition.ADDRESS}].`, { error: err });
-            }
-        }
-    );
+    // node.propUp.onSetMessage$.pipe(takeUntil(node.onDestroy$)).subscribe(
+    //     {
+    //         next: event => {
 
-    node.propDown.onSetMessage$.pipe(takeUntil(node.onDestroy$)).subscribe(
-        {
-            next: event => {
-               
-                conn.ccu.putParamset(conn.clientId, channel.definition.ADDRESS, 'VALUES', { [blindChannel_Param_Level]: "0" }).then(() => {
-                    event.property.value = event.valueStr;
-                }).catch((err) => {
-                    log.error(`${node.propDown.pointer}: error setting level value to "100"`, err)
-                })
-            },
-            error: (err) => {
-                log.error(`Error process set Event for [${node.propDown.pointer}]/[${channel.definition.ADDRESS}].`, { error: err });
-            }
-        }
-    );
+    //             conn.ccu.putParamset(conn.clientId, channel.definition.ADDRESS, 'VALUES', { [blindChannel_Param_Level]: "100" }).then(() => {
+    //                 event.property.value = event.valueStr;
+    //             }).catch((err) => {
+    //                 log.error(`${node.propUp.pointer}: error setting level value to "100"`, err)
+    //             })
+    //         },
+    //         error: (err) => {
+    //             log.error(`Error process set Event for [${node.propUp.pointer}]/[${channel.definition.ADDRESS}].`, { error: err });
+    //         }
+    //     }
+    // );
 
-    node.propStop.onSetMessage$.pipe(takeUntil(node.onDestroy$)).subscribe(
+    // node.propDown.onSetMessage$.pipe(takeUntil(node.onDestroy$)).subscribe(
+    //     {
+    //         next: event => {
+
+    //             conn.ccu.putParamset(conn.clientId, channel.definition.ADDRESS, 'VALUES', { [blindChannel_Param_Level]: "0" }).then(() => {
+    //                 event.property.value = event.valueStr;
+    //             }).catch((err) => {
+    //                 log.error(`${node.propDown.pointer}: error setting level value to "100"`, err)
+    //             })
+    //         },
+    //         error: (err) => {
+    //             log.error(`Error process set Event for [${node.propDown.pointer}]/[${channel.definition.ADDRESS}].`, { error: err });
+    //         }
+    //     }
+    // );
+
+    node.propAction.onSetMessage$.pipe(takeUntil(node.onDestroy$)).subscribe(
         {
             next: event => {
-               
-                conn.ccu.putParamset(conn.clientId, channel.definition.ADDRESS, 'VALUES', { [blindChannel_Param_Stop]: true }).then(() => {
-                    event.property.value = event.valueStr;
-                }).catch((err) => {
-                    log.error(`${node.propStop.pointer}: error setting level value to "100"`, err)
-                })
+                if (event.valueStr === 'stop') {
+                    conn.ccu.putParamset(conn.clientId, channel.definition.ADDRESS, 'VALUES', { [blindChannel_Param_Stop]: true }).then(() => {
+                        event.property.value = event.valueStr;
+                    }).catch((err) => {
+                        log.error(`${node.propAction.pointer}: error sending stop command`, err)
+                    })
+                }
             },
             error: (err) => {
-                log.error(`Error process set Event for [${node.propStop.pointer}]/[${channel.definition.ADDRESS}].`, { error: err });
+                log.error(`Error process set Event for [${node.propAction.pointer}]/[${channel.definition.ADDRESS}].`, { error: err });
             }
         }
     );
@@ -115,6 +116,6 @@ function blindsPositionToHomiePostion(pos: any): number {
     return Math.floor((1 - parseFloat(pos)) * 100);
 }
 
-function homiePositionToBlindsPosition(pos: any) : string{
-    return String((100 -  (pos as number)) / 100);
+function homiePositionToBlindsPosition(pos: any): string {
+    return String((100 - (pos as number)) / 100);
 }
