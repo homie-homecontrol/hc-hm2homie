@@ -3,7 +3,6 @@ import { CCUChannelTypes, Channel, Device } from "../../ccu";
 import { FactoryDevice } from "../FactoryDevice";
 import { HMKeyToNode } from "./HMKey.func";
 import { HMShutterContactToNode } from "./HMShutterContact.func";
-import { NodeCreatorMap } from "./hmhomie.model";
 import { HMMaintenanceToNode } from "./HMMaintenance.func";
 import { HMSwitchToNode } from "./HMSwitch.func";
 import { HMThermalControlToNode } from "./HMThermalControl.func";
@@ -17,6 +16,7 @@ import { HMConditionPowerToNode } from "./HMConditionPower.func";
 import { HMConditionFrequencyToNode } from "./HMConditionFrequency.func";
 import { HMConditionVoltageToNode } from "./HMConditionVoltage.func";
 import { HMVirtualKeyToNode } from "./HMVirtualKey.func";
+import { NodeCreatorMap } from "./hmhomie.model";
 
 const nodeMap: NodeCreatorMap = {
     'MAINTENANCE': HMMaintenanceToNode,

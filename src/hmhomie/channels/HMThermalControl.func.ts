@@ -1,11 +1,12 @@
 import { ThermostatNode, WeatherNode } from "hc-node-homie-smarthome";
 import { takeUntil } from "rxjs/operators";
 import { CCUConnectionInfo } from "../../ccu/CCU";
-import { CCU_CH_TYPE_CLIMATECONTROL_RT_TRANSCEIVER, CCU_CH_TYPE_THERMALCONTROL_TRANSMIT, Channel } from "../../ccu/homematic.model";
+import { CCU_CH_TYPE_CLIMATECONTROL_RT_TRANSCEIVER, CCU_CH_TYPE_THERMALCONTROL_TRANSMIT, Channel, Device } from "../../ccu/homematic.model";
 import { FactoryDevice } from "../FactoryDevice";
 import { log } from "./logging";
-import { getIndexFromChannelAddress } from "./util.func";
+import { getIndexFromChannelAddress } from "../../ccu";
 import { ThermostatMode } from "hc-node-homie-smarthome/model";
+import { HomieNode, HomieProperty } from "node-homie";
 
 export function HMThermalControlToNode(device: FactoryDevice, channels: Channel[], conn: CCUConnectionInfo) {
     if (channels.length === 1) {
@@ -148,6 +149,7 @@ function createThermalControlNode(device: FactoryDevice, channel: Channel, conn:
 
 
 }
+
 
 function getMode(ctlmode: number): ThermostatMode {
     if (ctlmode === 0) { return 'auto'; }

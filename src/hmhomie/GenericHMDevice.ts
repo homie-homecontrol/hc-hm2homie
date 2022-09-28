@@ -9,6 +9,7 @@ import { FactoryDevice } from "./FactoryDevice";
 import { createNodeFromChannel, hmID2HomieID, isChannelAddr } from "./utils";
 import { createNodesForDevice } from "./channels";
 import { H_SMARTHOME_NS_V1 } from "hc-node-homie-smarthome/model";
+import { createCfgNodesForDevice } from "./config";
 
 
 export class GenericHMDevice extends FactoryDevice {
@@ -35,6 +36,10 @@ export class GenericHMDevice extends FactoryDevice {
     public async create() {
         if (this.created) { return Promise.resolve(); }
 
+        // create special config nodes to handle HomeMatic specific settings for a device
+        createCfgNodesForDevice(this, this.device, this.conn);
+
+        // create node-homie-smartphone specific nodes to expose the hm devices functionality as generic as possible
         this.specificNodeCreated = createNodesForDevice(this, this.device, this.conn);
 
         if (!this.specificNodeCreated) {

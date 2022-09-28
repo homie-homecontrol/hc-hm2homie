@@ -3,7 +3,8 @@ import { takeUntil } from "rxjs/operators";
 import { CCUConnectionInfo, Channel } from "../../ccu";
 import { FactoryDevice } from "../FactoryDevice";
 import { log } from "./logging";
-import { getIndexFromChannelAddress } from "./util.func";
+import { getIndexFromChannelAddress } from "../../ccu";
+
 
 export function HMWeatherToNode(device: FactoryDevice, channels: Channel[], conn: CCUConnectionInfo) {
     if (channels.length === 1) {

@@ -4,7 +4,8 @@ import { CCUConnectionInfo } from "../../ccu/CCU";
 import { Channel } from "../../ccu/homematic.model";
 import { FactoryDevice } from "../FactoryDevice";
 import { log } from "./logging";
-import { getIndexFromChannelAddress } from "./util.func";
+import { getIndexFromChannelAddress } from "../../ccu";
+
 
 export function HMSwitchToNode(device: FactoryDevice, channels: Channel[], conn: CCUConnectionInfo) {
     if (channels.length === 1) {

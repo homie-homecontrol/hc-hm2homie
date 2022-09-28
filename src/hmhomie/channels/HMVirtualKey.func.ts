@@ -6,7 +6,8 @@ import { Channel } from "../../ccu/homematic.model";
 import { FactoryDevice } from "../FactoryDevice";
 import { VirtualKeyNode } from "../nodes/VirtualKeyNode";
 import { log } from "./logging";
-import { getIndexFromChannelAddress } from "./util.func";
+import { getIndexFromChannelAddress } from "../../ccu";
+
 
 export function HMVirtualKeyToNode(device: FactoryDevice, channels: Channel[], conn: CCUConnectionInfo) {
     if (channels.length === 1) {

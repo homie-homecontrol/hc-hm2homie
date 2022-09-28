@@ -188,4 +188,11 @@ export const CCU_CH_TYPES = [
     CCU_CH_TYPE_CONDITION_VOLTAGE,
     CCU_CH_TYPE_CONDITION_FREQUENCY,
 ] as const;
-export type CCUChannelTypes = typeof CCU_CH_TYPES[number]; 
+export type CCUChannelTypes = typeof CCU_CH_TYPES[number];
+
+
+export const CCU_DEV_WEEKDAYS = [
+    'MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY'
+] as const;
+
+export type CCUDevWeekdays = typeof CCU_DEV_WEEKDAYS[number];
