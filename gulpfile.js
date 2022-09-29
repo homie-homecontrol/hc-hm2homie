@@ -134,10 +134,7 @@ function makeRunServer(target){
 // }
 
 
-gulp.task('default', gulp.series(
-  // 'upgradePKG', 
-  devBuild,
-  assets));
-gulp.task('prod', gulp.series(generateJSONSchema, prodBuild, assets));
-gulp.task('watch', gulp.series(generateJSONSchema, devBuild, assets, makeRunServer('test'), watch));
-gulp.task('debug', gulp.series(generateJSONSchema, devBuild, assets, makeRunServer('debug')));
+gulp.task('default', gulp.series(ensureDist, generateJSONSchema, devBuild, assets));
+gulp.task('prod', gulp.series(ensureDist, generateJSONSchema, prodBuild, assets));
+gulp.task('watch', gulp.series(ensureDist, generateJSONSchema, devBuild, assets, makeRunServer('test'), watch));
+gulp.task('debug', gulp.series(ensureDist, generateJSONSchema, devBuild, assets, makeRunServer('debug')));
