@@ -17,7 +17,7 @@ const path = require("path");
 
 const JSONS_CONVERSIONS = [
   {
-    source: 'src/hmhomie/config/HMWeekProgram.model.ts',
+    source: 'src/hmhomie/config/HMThermostatCfg.model.ts',
     type: 'WeekPrograms',
     output: 'HMWeekProgram.Schema.json',
     defaultCfg: { encodeRefs: false },

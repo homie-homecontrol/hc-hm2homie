@@ -9,3 +9,14 @@ export type WeekProgram = {
 }
 
 export type WeekPrograms = WeekProgram[];
+
+export const boostTimeValues = [
+    "0m",
+    "5m",
+    "10m",
+    "15m",
+    "20m",
+    "25m",
+    "30m"] as const;
+
+export type BoostTimeValue = typeof boostTimeValues[number];

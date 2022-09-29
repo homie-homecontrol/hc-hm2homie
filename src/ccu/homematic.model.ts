@@ -196,3 +196,6 @@ export const CCU_DEV_WEEKDAYS = [
 ] as const;
 
 export type CCUDevWeekdays = typeof CCU_DEV_WEEKDAYS[number];
+
+export type CCUMultiCallMethod= { methodName: string, params: any[] };
+export type CCUMultiCallParams= CCUMultiCallMethod[];

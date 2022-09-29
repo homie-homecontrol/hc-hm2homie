@@ -332,7 +332,7 @@ export class CCU extends EventEmitter implements OnInit, OnDestroy {
     }
 
 
-    private async methodCall(connection: CCUConnection | string, methodName, params: any[]): Promise<any> {
+    public async methodCall(connection: CCUConnection | string, methodName, params: any[]): Promise<any> {
         const CHUNK_SIZE = 15
         const conn = (typeof connection) === 'string' ? this.connections[connection as string] : connection as CCUConnection;
         if (!conn) {
