@@ -17,7 +17,7 @@ const Param_BoostAfterWindowOpen = 'BOOST_AFTER_WINDOW_OPEN';
 
 
 export function HMThermostatCfgFromConfig(device: FactoryDevice, hmDevice: Device, conn: CCUConnectionInfo) {
-    const node = device.add(new HomieNode(device, { id: 'hm-config', name: 'Thermostat config', type: `${H_SMARTHOME_TYPE_EXTENSTION}=hmthermostat-config`}));
+    const node = device.add(new HomieNode(device, { id: 'hm-config', name: 'Thermostat config', type: `${H_SMARTHOME_TYPE_EXTENSTION}=hmthermostat-config` }));
 
     createWeekProgramProps(device, node, hmDevice, conn);
     createBoostAfterWindowOpenProp(device, node, hmDevice, conn);
@@ -85,7 +85,7 @@ function createWeekProgramProps(device: FactoryDevice, node: HomieNode, hmDevice
                 return;
             }
 
-            const methodCalls: CCUMultiCallParams = [];
+            const paramSet = {};
             for (let progNo = 0; progNo < newWeekPrograms.length; progNo++) {
                 const prefix = newWeekPrograms.length > 1 ? `P${progNo + 1}_` : '';
                 const newWeekProgram = newWeekPrograms[progNo];
@@ -99,19 +99,19 @@ function createWeekProgramProps(device: FactoryDevice, node: HomieNode, hmDevice
                         const currentTemp = currentWeekProgram[weekday][slot].temp;
 
                         if (newEndtime !== currentEndtime) {
-                            methodCalls.push({ methodName: 'putParamset', params: [hmDevice.definition.ADDRESS, "MASTER", { [`${prefix}ENDTIME_${weekday}_${slot + 1}`]: newEndtime }] });
+                            paramSet[`${prefix}ENDTIME_${weekday}_${slot + 1}`] = newEndtime
                         }
                         if (newTemp !== currentTemp) {
-                            methodCalls.push({ methodName: 'putParamset', params: [hmDevice.definition.ADDRESS, "MASTER", { [`${prefix}TEMPERATURE_${weekday}_${slot + 1}`]: String(newTemp) }] });
+                            paramSet[`${prefix}TEMPERATURE_${weekday}_${slot + 1}`] = String(newTemp)
                         }
                     }
                 }
             }
-            log.info('Changed params: ', { methodCalls });
-            conn.ccu.methodCall(conn.clientId, 'system.multicall', [methodCalls]).then(() => {
+            log.info('Changed params: ', { paramSet });
+            conn.ccu.putParamset(conn.clientId, hmDevice.definition.ADDRESS, "MASTER", paramSet).then(() => {
                 msg.property.value = msg.valueStr;
             }).catch((err) => {
-                log.error(`${msg.property.pointer}: error setting value to ${msg.value} -- ${typeof msg.value}`, { err, methodCalls })
+                log.error(`${msg.property.pointer}: error setting value to ${msg.value} -- ${typeof msg.value}`, { err, paramSet })
             });
 
         }
@@ -183,7 +183,7 @@ function createBoostTimePeriodProp(device: FactoryDevice, node: HomieNode, hmDev
 }
 
 function createBoostValveOpeningProp(device: FactoryDevice, node: HomieNode, hmDevice: Device, conn: CCUConnectionInfo) {
-    if (!hmDevice.config[Param_BoostPosition]){
+    if (!hmDevice.config[Param_BoostPosition]) {
         return;
     }
 
