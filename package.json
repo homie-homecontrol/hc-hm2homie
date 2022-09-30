@@ -1,6 +1,6 @@
 {
   "name": "hc-hm2homie",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "expose hm ccu via homie protocol convention",
   "main": "service.js",
   "scripts": {
