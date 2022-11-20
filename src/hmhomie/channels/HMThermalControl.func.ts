@@ -139,6 +139,9 @@ function createThermalControlNode(device: FactoryDevice, channel: Channel, conn:
                 if (message.deviceAddress === channel.definition.ADDRESS && message.datapoint === thermostatChannel_Param_SetTemperature) {
                     node.setTemperature = message.value;
                 }
+                if (message.deviceAddress === channel.definition.ADDRESS && message.datapoint === thermostatChannel_Param_Valve) {
+                    node.valve = message.value;
+                }
 
             },
             error: (err) => {
