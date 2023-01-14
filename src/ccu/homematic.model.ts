@@ -161,6 +161,7 @@ export const CCU_CH_TYPE_BLIND = 'BLIND'; // ->ShutterNode
 export const CCU_CH_TYPE_WEATHER_TRANSMIT = 'WEATHER_TRANSMIT';   // -->weatherNode
 export const CCU_CH_TYPE_THERMALCONTROL_TRANSMIT = 'THERMALCONTROL_TRANSMIT'; // -->ThermostatNode
 export const CCU_CH_TYPE_CLIMATECONTROL_RT_TRANSCEIVER = 'CLIMATECONTROL_RT_TRANSCEIVER'; // -->ThermostatNode
+export const CCU_CH_TYPE_HEATING_CLIMATECONTROL_TRANSCEIVER = 'HEATING_CLIMATECONTROL_TRANSCEIVER'; // -->HM IP Wall Thermostat and Radiator Thermostat
 export const CCU_CH_TYPE_POWERMETER = 'POWERMETER';
 export const CCU_CH_TYPE_CONDITION_POWER = 'CONDITION_POWER';
 export const CCU_CH_TYPE_CONDITION_CURRENT = 'CONDITION_CURRENT';
@@ -182,6 +183,7 @@ export const CCU_CH_TYPES = [
     CCU_CH_TYPE_WEATHER_TRANSMIT,
     CCU_CH_TYPE_THERMALCONTROL_TRANSMIT,
     CCU_CH_TYPE_CLIMATECONTROL_RT_TRANSCEIVER,
+    CCU_CH_TYPE_HEATING_CLIMATECONTROL_TRANSCEIVER,
     CCU_CH_TYPE_POWERMETER,
     CCU_CH_TYPE_CONDITION_POWER,
     CCU_CH_TYPE_CONDITION_CURRENT,
@@ -199,3 +201,4 @@ export type CCUDevWeekdays = typeof CCU_DEV_WEEKDAYS[number];
 
 export type CCUMultiCallMethod= { methodName: string, params: any[] };
 export type CCUMultiCallParams= CCUMultiCallMethod[];
+type Tree<T> = { value: T, children: Tree<T>[] }

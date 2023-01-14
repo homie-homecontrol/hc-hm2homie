@@ -4,9 +4,10 @@ import { CCUConnectionInfo } from "../../ccu/CCU";
 import { CCUMultiCallParams, CCU_DEV_WEEKDAYS, Device, Paramset } from "../../ccu/homematic.model";
 import { FactoryDevice } from "../FactoryDevice";
 import { HomieNode, HomieProperty } from "node-homie";
-import { WeekPrograms, WeekProgram, DayProgram, BoostTimeValue, boostTimeValues } from "./HMThermostatCfg.model";
+import { WeekPrograms, WeekProgram, DayProgram, BoostTimeValue, boostTimeValues } from "./../nodes/HMWeekProgram.model";
 import { log } from "./logging";
 import { H_SMARTHOME_TYPE_EXTENSTION } from "hc-node-homie-smarthome/model";
+import { HeatingWeekProgramNode } from "../nodes/HeatingWeekprogramNode";
 
 const schema = require.main.require('./HMWeekProgram.Schema.json');
 
@@ -17,9 +18,9 @@ const Param_BoostAfterWindowOpen = 'BOOST_AFTER_WINDOW_OPEN';
 
 
 export function HMThermostatCfgFromConfig(device: FactoryDevice, hmDevice: Device, conn: CCUConnectionInfo) {
-    const node = device.add(new HomieNode(device, { id: 'hm-config', name: 'Thermostat config', type: `${H_SMARTHOME_TYPE_EXTENSTION}=hmthermostat-config` }));
+    createWeekProgramNode(device, hmDevice, conn);
 
-    createWeekProgramProps(device, node, hmDevice, conn);
+    const node = device.add(new HomieNode(device, { id: 'hm-config', name: 'Thermostat config', type: `${H_SMARTHOME_TYPE_EXTENSTION}=hmthermostat-config` }));
     createBoostAfterWindowOpenProp(device, node, hmDevice, conn);
     createBoostTimePeriodProp(device, node, hmDevice, conn);
     createBoostValveOpeningProp(device, node, hmDevice, conn);
@@ -27,26 +28,13 @@ export function HMThermostatCfgFromConfig(device: FactoryDevice, hmDevice: Devic
 }
 
 
-function createWeekProgramProps(device: FactoryDevice, node: HomieNode, hmDevice: Device, conn: CCUConnectionInfo) {
-    const propProgramNumber = node.add(new HomieProperty(node,
-        {
-            id: 'active-program',
-            name: 'Active Program Number',
-            datatype: "integer",
-            retained: true,
-            settable: true
-        }));
-    const propProgram = node.add(new HomieProperty(node,
-        {
-            id: 'week-programs',
-            name: 'JSON week programs',
-            datatype: "string",
-            retained: true,
-            settable: true,
-            format: `jsonschema:${JSON.stringify(schema)}`
-        }));
+function createWeekProgramNode(device: FactoryDevice, hmDevice: Device, conn: CCUConnectionInfo) {
+    const node = device.add(new HeatingWeekProgramNode(device));
+    const propProgramNumber = node.propActiveProgram;
+    const propProgram = node.propWeekPrograms;
 
     const programs: WeekPrograms = [];
+
 
     if (hmDevice.config[Param_WeekProgramPointer]) {
         // console.log(`DeviceConfig: ${JSON.stringify(hmDevice.config)}`);
@@ -215,6 +203,7 @@ function createBoostValveOpeningProp(device: FactoryDevice, node: HomieNode, hmD
 function getWeekProgramFromConfig(config: Paramset, prefix = ""): WeekProgram {
     const weekprogram: Partial<WeekProgram> = {};
 
+
     for (const weekday of CCU_DEV_WEEKDAYS) {
         const dayProgram: Partial<DayProgram> = [];
         for (let slot = 1; slot < 14; slot++) {
@@ -227,7 +216,7 @@ function getWeekProgramFromConfig(config: Paramset, prefix = ""): WeekProgram {
             }
         }
         if (dayProgram.length != 13) {
-            throw Error('Could not find complete dayprogram');
+            throw Error(`Could not find complete dayprogram`);
         }
         weekprogram[weekday] = dayProgram as DayProgram;
     }

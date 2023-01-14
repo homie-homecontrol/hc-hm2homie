@@ -8,7 +8,8 @@ import { log } from "./logging";
 
 const configNodeMap: ConfigNodeCreatorMap = {
     'HM-TC-IT-WM-W-EU': HMThermostatCfgFromConfig,
-    'HM-CC-RT-DN': HMThermostatCfgFromConfig
+    'HM-CC-RT-DN': HMThermostatCfgFromConfig,
+    // 'HmIP-WTH-1': HMThermostatCfgFromConfig
 }
 
 export function createCfgNodesForDevice(device: FactoryDevice, hmDevice: Device, conn: CCUConnectionInfo): boolean {

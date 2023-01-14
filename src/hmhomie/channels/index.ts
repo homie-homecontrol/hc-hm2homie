@@ -17,6 +17,7 @@ import { HMConditionFrequencyToNode } from "./HMConditionFrequency.func";
 import { HMConditionVoltageToNode } from "./HMConditionVoltage.func";
 import { HMVirtualKeyToNode } from "./HMVirtualKey.func";
 import { NodeCreatorMap } from "./hmhomie.model";
+import { HMHeatingClimatecontrolToNode } from "./HMHeatingClimatecontrol.func";
 
 const nodeMap: NodeCreatorMap = {
     'MAINTENANCE': HMMaintenanceToNode,
@@ -26,6 +27,7 @@ const nodeMap: NodeCreatorMap = {
     'WEATHER_TRANSMIT': HMWeatherToNode,
     'THERMALCONTROL_TRANSMIT': HMThermalControlToNode,
     'CLIMATECONTROL_RT_TRANSCEIVER': HMThermalControlToNode,
+    'HEATING_CLIMATECONTROL_TRANSCEIVER': HMHeatingClimatecontrolToNode,
     'SHUTTER_CONTACT': HMShutterContactToNode,
     'TILT_SENSOR': HMTiltToNode,
     'BLIND': HMBlindToNode,
@@ -43,7 +45,7 @@ type ChannelGrouping = {
 
 export function createNodesForDevice(device: FactoryDevice, hmDevice: Device, conn: CCUConnectionInfo): boolean {
     let created = false;
-    log.verbose(`Creating nodes for device [${hmDevice.name} | ${hmDevice.definition.ADDRESS}]`);
+    log.verbose(`Creating nodes for device [${hmDevice.name} | ${hmDevice.definition.ADDRESS} | ${conn.protocol}]`);
     const cg: ChannelGrouping = {};
     hmDevice.channels.forEach(channel => {
         if (cg[channel.definition.TYPE as CCUChannelTypes]) {

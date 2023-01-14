@@ -34,9 +34,13 @@ export class DeviceFactory {
     public async createDevice(conn: CCUConnectionInfo, device: DeviceDescription | string): Promise<HomieDevice> {
         let hmDevice: Device = null;
         const address = typeof device === 'string' ? device as string : device.ADDRESS;
+        // if (address.includes('HmIP-RCV-1')) { return null }
         try {
 
             hmDevice = await conn.ccu.getCCUDevice(conn.clientId, address);
+            if (!hmDevice) {
+                return null
+            }
 
         } catch (err) {
             this.log.error(`${conn.clientId} - ${address}: Failed to load CCUDeviceInfo!`, err);

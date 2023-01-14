@@ -11,6 +11,7 @@ import { ParamsetDescription, CCUDeviceMessage, Paramset, Datapoint, Device, Cha
 import * as winston from "winston";
 import { OnDestroy, OnInit } from "node-homie/misc";
 import { CCU_PROTOCOLS } from ".";
+import { inspect } from "util";
 
 export interface CCUConnectionInfo {
     clientId: string;
@@ -124,42 +125,42 @@ export class CCU extends EventEmitter implements OnInit, OnDestroy {
         });
 
         this.core.settings.ccu_interfaces.forEach(interf => {
-            if (!isCCUProtocol(interf)){
+            if (!isCCUProtocol(interf)) {
                 throw new Error(`[${interf}] is not a valid interface protocol. Must be one of [${CCU_PROTOCOLS.join(", ")}].`);
             }
         })
 
 
-            this.ifaceConfigs = {
-                [CCU_PROTO_BIDCOS_RF]: {
-                    name: CCU_PROTO_BIDCOS_RF,
-                    rpc: rpc,
-                    port: CCU_PROTO_PORTS[CCU_PROTO_BIDCOS_RF], // no tls ports implemented yet
-                    protocol: 'http',
-                    auth: false, // not implemented yet
-                    username: null, // not implemented yet
-                    password: null, // not implemented yet
-                    tls: false, // not implemented yet
-                    inSecure: true,
-                    init: true,
-                    ping: true
-                },
-                [CCU_PROTO_HMIP_RF]: {
-                    name: CCU_PROTO_HMIP_RF,
-                    rpc: rpc,
-                    port: CCU_PROTO_PORTS[CCU_PROTO_HMIP_RF], // no tls ports implemented yet
-                    protocol: 'http',
-                    auth: false, // not implemented yet
-                    username: null, // not implemented yet
-                    password: null, // not implemented yet
-                    tls: false, // not implemented yet
-                    inSecure: true,
-                    init: true,
-                    ping: true,
-                    pingTimeout: 600
-                },
+        this.ifaceConfigs = {
+            [CCU_PROTO_BIDCOS_RF]: {
+                name: CCU_PROTO_BIDCOS_RF,
+                rpc: rpc,
+                port: CCU_PROTO_PORTS[CCU_PROTO_BIDCOS_RF], // no tls ports implemented yet
+                protocol: 'http',
+                auth: false, // not implemented yet
+                username: null, // not implemented yet
+                password: null, // not implemented yet
+                tls: false, // not implemented yet
+                inSecure: true,
+                init: true,
+                ping: true
+            },
+            [CCU_PROTO_HMIP_RF]: {
+                name: CCU_PROTO_HMIP_RF,
+                rpc: rpc,
+                port: CCU_PROTO_PORTS[CCU_PROTO_HMIP_RF], // no tls ports implemented yet
+                protocol: 'http',
+                auth: false, // not implemented yet
+                username: null, // not implemented yet
+                password: null, // not implemented yet
+                tls: false, // not implemented yet
+                inSecure: true,
+                init: true,
+                ping: true,
+                pingTimeout: 600
+            },
 
-            }
+        }
         this.rega = new Rega({ host: core.settings.ccu_host })
     }
 
@@ -340,17 +341,35 @@ export class CCU extends EventEmitter implements OnInit, OnDestroy {
         }
 
         const timerstart = Date.now();
-        if (methodName === 'system.multicall' && params[0].length > CHUNK_SIZE) {
-            let result: any[] = [];
-            for (let index = 0; index < params[0].length; index += CHUNK_SIZE) {
-                const chunk = params[0].slice(index, index + CHUNK_SIZE);
-                const res = await this.methodCall(conn, methodName, [chunk])
-                result = [...result, ...res];
 
+        if (methodName === 'system.multicall') {
+
+            if (conn.protocol !== 'hmip-rf' && params[0].length > CHUNK_SIZE) {
+                let result: any[] = [];
+                for (let index = 0; index < params[0].length; index += CHUNK_SIZE) {
+                    const chunk = params[0].slice(index, index + CHUNK_SIZE);
+                    const res = await this.methodCall(conn, methodName, [chunk])
+                    result = [...result, ...res];
+
+                }
+                this.log.debug(`${methodName} merged runtime: ${Date.now() - timerstart}ms`)
+                // this.log.debug('MERGED Result: ',result)
+                return Promise.resolve(result);
             }
-            this.log.debug(`${methodName} merged runtime: ${Date.now() - timerstart}ms`)
-            // this.log.debug('MERGED Result: ',result)
-            return Promise.resolve(result);
+
+            if (conn.protocol === 'hmip-rf') {
+                let result: any[] = [];
+                for (let index = 0; index < params[0].length; index++) {
+                    const multicallParam: { methodName: string, params: any[] } = params[0][index];
+                    // this.log.verbose(`Calling ${multicallParam.methodName}`, {params: multicallParam.params, "atindex": params[0][index]})
+                    const res = await this.methodCall(conn, multicallParam.methodName, multicallParam.params)
+                    result.push([res])
+
+                }
+                this.log.debug(`${methodName} merged runtime: ${Date.now() - timerstart}ms`)
+                this.log.debug('MERGED Result: ', result)
+                return Promise.resolve(result);
+            }
         }
 
         return new Promise<any>((resolve, reject) => {
@@ -362,7 +381,7 @@ export class CCU extends EventEmitter implements OnInit, OnDestroy {
                 this.log.error(`Timeout for request for ${conn.protocol} - ${methodName} - ${JSON.stringify(params)}`)
                 timedOut = true;
                 if (!callFinished) {
-                    this.log.debug(`${methodName} runtime: ${Date.now() - timerstart}ms`)
+                    this.log.verbose(`${methodName} runtime: ${Date.now() - timerstart}ms`)
                     reject(new Error(`Timeout for request for ${conn.protocol} - ${methodName} - ${JSON.stringify(params)}`));
                 }
             }, 60000);
@@ -502,8 +521,11 @@ export class CCU extends EventEmitter implements OnInit, OnDestroy {
 
     public async getCCUDevice(conn: string | CCUConnection, address: string): Promise<Device> {
         const result: Device = null;
-
         const deviceDesc = await this.methodCall(conn, 'getDeviceDescription', [address, 'MASTER']) as DeviceDescription;
+
+        // Skip virtual hm devices (TODO: Find a cleaner way to handle this)
+        if (deviceDesc.TYPE === 'HmIP-RCV-50' || deviceDesc.TYPE === 'HM-RCV-50') { return null; }
+
         const paramset = await this.methodCall(conn, 'getParamset', [address, 'MASTER']);
         const paramsetDesc = await this.methodCall(conn, 'getParamsetDescription', [address, 'MASTER']);
 
@@ -519,10 +541,9 @@ export class CCU extends EventEmitter implements OnInit, OnDestroy {
             ];
             return calls;
         });
-
         const channelCallsFlat = channelCalls.reduce((a, b) => a.concat(b))
         const channelsData = await this.methodCall(conn, 'system.multicall', [channelCallsFlat]);
-        // this.log.debug("Description: ",inspect(channelsData, { showHidden: false, depth: null }));
+        // this.log.verbose("Description: ",inspect(channelsData, { showHidden: false, depth: null }));
         const channels: Channel[] = [];
 
         for (let index = 0; index < channelsData.length; index += 5) {
