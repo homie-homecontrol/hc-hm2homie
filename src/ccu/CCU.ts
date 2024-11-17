@@ -209,7 +209,7 @@ export class CCU extends EventEmitter implements OnInit, OnDestroy {
         const clientOpts = {
             host: host,
             port: port,
-            path: '/'
+            path: '/',
         }
         this.log.info(`Client connecting to : ${clientOpts.host}:${clientOpts.port}`);
         return rpc.createClient(clientOpts);
@@ -219,7 +219,8 @@ export class CCU extends EventEmitter implements OnInit, OnDestroy {
         return new Promise<rpc.Server>((resolve, reject) => {
             const serverOpts = {
                 host: host,
-                port: port
+                port: port,
+                reusedSocket: true,
             }
             const server = rpc.createServer(serverOpts, () => {
                 this.log.info(`Server listening on: ${serverOpts.host}:${serverOpts.port}`);

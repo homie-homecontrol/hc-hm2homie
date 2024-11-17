@@ -65,7 +65,7 @@ const onShutdown = async (code) => {
     asyncTimeout(3000)
   ]);
 log.info('...done');
-process.exit(code);
+process.exit(0);
 }
 
 process.on('SIGTERM', onShutdown);

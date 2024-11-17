@@ -18,6 +18,7 @@ import { HMConditionVoltageToNode } from "./HMConditionVoltage.func";
 import { HMVirtualKeyToNode } from "./HMVirtualKey.func";
 import { NodeCreatorMap } from "./hmhomie.model";
 import { HMHeatingClimatecontrolToNode } from "./HMHeatingClimatecontrol.func";
+import { HMPresenceToNode } from "./HMPresence.func";
 
 const nodeMap: NodeCreatorMap = {
     'MAINTENANCE': HMMaintenanceToNode,
@@ -36,7 +37,8 @@ const nodeMap: NodeCreatorMap = {
     'CONDITION_POWER': HMConditionPowerToNode,
     'CONDITION_FREQUENCY': HMConditionFrequencyToNode,
     'CONDITION_VOLTAGE': HMConditionVoltageToNode,
-    'VIRTUAL_KEY': HMVirtualKeyToNode
+    'VIRTUAL_KEY': HMVirtualKeyToNode,
+    'PRESENCEDETECTOR_TRANSCEIVER': HMPresenceToNode,
 }
 
 type ChannelGrouping = {
