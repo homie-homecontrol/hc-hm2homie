@@ -6,42 +6,59 @@ import { FactoryDevice } from "../FactoryDevice";
 import { log } from "./logging";
 import { getIndexFromChannelAddress } from "../../ccu";
 
-
 export function HMShutterContactToNode(device: FactoryDevice, channels: Channel[], conn: CCUConnectionInfo) {
     if (channels.length === 1) {
         createShutterContacthNode(device, channels[0], conn);
     } else {
-        channels.forEach(channel => {
+        channels.forEach((channel) => {
             const channelIndex = getIndexFromChannelAddress(channel.definition.ADDRESS);
             createShutterContacthNode(device, channel, conn, `contact-${channelIndex}`, `Contact ${channelIndex}`);
-        })
+        });
     }
-
 }
 
-function createShutterContacthNode(device: FactoryDevice, channel: Channel, conn: CCUConnectionInfo, id?: string, name?: string,) {
-
+function createShutterContacthNode(
+    device: FactoryDevice,
+    channel: Channel,
+    conn: CCUConnectionInfo,
+    id?: string,
+    name?: string,
+) {
     const node = device.add(new ContactNode(device, id ? { id, name } : undefined));
-    const contactChannel_Param_State = 'STATE';
+    const contactChannel_Param_State = "STATE";
+
+    // "INTEGER" => Ok(ParamType::Integer),
+    // "BOOL" => Ok(ParamType::Bool),
 
     // Set current state
-    node.state = channel.readings[contactChannel_Param_State]?.value;
+    const readings_type = channel.readings[contactChannel_Param_State]?.meta.TYPE;
+    if (readings_type === "BOOL") {
+        node.state = channel.readings[contactChannel_Param_State]?.value;
+    } else if (readings_type === "ENUM") {
+        node.state = channel.readings[contactChannel_Param_State]?.value === 1;
+    }
 
     // homie -> hm eventstream
 
     // hm -> homie eventstream
-    device.events$.pipe(takeUntil(node.propState.onDestroy$)).subscribe(
-        {
-            next: message => {
-                if (message.deviceAddress === channel.definition.ADDRESS && message.datapoint === contactChannel_Param_State) {
+    device.events$.pipe(takeUntil(node.propState.onDestroy$)).subscribe({
+        next: (message) => {
+            if (
+                message.deviceAddress === channel.definition.ADDRESS &&
+                message.datapoint === contactChannel_Param_State
+            ) {
+                if (readings_type === "BOOL") {
                     node.state = message.value;
+                } else if (readings_type === "ENUM") {
+                    node.state = message.value === 1;
                 }
-            },
-            error: (err) => {
-                log.error(`Error process hm message for [${node.propState.pointer}]/[${channel.definition.ADDRESS}].`, { error: err });
             }
-        }
-    )
-
-
+        },
+        error: (err) => {
+            log.error(`Error process hm message for [${node.propState.pointer}]/[${channel.definition.ADDRESS}].`, {
+                error: err,
+            });
+        },
+    });
 }
+
